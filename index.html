@@ -1,359 +1,550 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>麥塊 AI 世界冒險王｜名人任務教學網頁</title>
-  <meta name="description" content="麥塊 AI 世界冒險王：用 Minecraft 風格認識萊特兄弟、凱瑟琳・強森、諾貝爾、愛因斯坦與霍華德・卡特，結合座標、AI、紅石、指令方塊與古文明解謎。" />
-  <style>
-    :root {
-      --bg: #101a12;
-      --panel: #17351d;
-      --panel-2: #244b29;
-      --grass: #49a942;
-      --grass-2: #7bd348;
-      --dirt: #7a4d2f;
-      --sand: #e7c36f;
-      --gold: #ffd65a;
-      --sky: #7cc7ff;
-      --redstone: #f04444;
-      --text: #f7ffe9;
-      --muted: #cce5c0;
-      --line: rgba(255,255,255,.18);
-      --shadow: 0 20px 60px rgba(0,0,0,.35);
-      --radius: 24px;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
-      background:
-        linear-gradient(rgba(255,255,255,.035) 2px, transparent 2px),
-        linear-gradient(90deg, rgba(255,255,255,.035) 2px, transparent 2px),
-        radial-gradient(circle at top left, rgba(124,199,255,.25), transparent 34rem),
-        radial-gradient(circle at 80% 10%, rgba(255,214,90,.18), transparent 30rem),
-        linear-gradient(180deg, #0c1a12 0%, #132717 45%, #0b140d 100%);
-      background-size: 42px 42px, 42px 42px, auto, auto, auto;
-      line-height: 1.7;
-    }
-    a { color: inherit; }
-    .wrap { width: min(1160px, calc(100% - 32px)); margin: 0 auto; }
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: rgba(12,26,18,.78);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 66px;
-      gap: 16px;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; letter-spacing: .04em; }
-    .cube {
-      width: 36px; height: 36px;
-      background:
-        linear-gradient(135deg, #6ed350 0 48%, #43a047 49% 100%);
-      border: 3px solid rgba(0,0,0,.35);
-      box-shadow: inset 0 -8px 0 rgba(0,0,0,.15), 0 5px 0 rgba(0,0,0,.28);
-      transform: rotate(3deg);
-    }
-    .nav a { text-decoration: none; color: var(--muted); font-weight: 800; font-size: 14px; }
-    .nav-links { display: flex; gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
-    .hero { padding: 72px 0 48px; }
-    .hero-grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 28px; align-items: center; }
-    .badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 12px;
-      border: 2px solid rgba(255,255,255,.25);
-      background: rgba(36,75,41,.78);
-      border-radius: 999px;
-      color: #eaffd5;
-      font-weight: 900;
-      box-shadow: 0 6px 0 rgba(0,0,0,.18);
-    }
-    h1 {
-      font-size: clamp(42px, 7vw, 82px);
-      line-height: 1.02;
-      margin: 18px 0 18px;
-      letter-spacing: -0.06em;
-      text-shadow: 0 8px 0 rgba(0,0,0,.22);
-    }
-    .hero strong { color: var(--gold); }
-    .lead { font-size: clamp(18px, 2vw, 23px); color: #e4f7d8; max-width: 760px; }
-    .actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 24px; }
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      min-height: 48px;
-      padding: 10px 18px;
-      border: 3px solid rgba(0,0,0,.35);
-      border-radius: 12px;
-      background: var(--gold);
-      color: #31220b;
-      font-weight: 950;
-      text-decoration: none;
-      box-shadow: 0 7px 0 rgba(0,0,0,.32);
-      transition: transform .16s ease, box-shadow .16s ease;
-    }
-    .btn:hover { transform: translateY(2px); box-shadow: 0 4px 0 rgba(0,0,0,.32); }
-    .btn.secondary { background: #8be36a; color: #10220f; }
-    .mini-map {
-      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03)), var(--panel);
-      border: 4px solid rgba(0,0,0,.35);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow), inset 0 -14px 0 rgba(0,0,0,.16);
-      padding: 22px;
-      position: relative;
-      overflow: hidden;
-    }
-    .mini-map:before {
-      content: ""; position: absolute; inset: 0;
-      background: linear-gradient(90deg, transparent 0 92%, rgba(255,255,255,.07) 92% 100%), linear-gradient(transparent 0 92%, rgba(255,255,255,.07) 92% 100%);
-      background-size: 48px 48px;
-      opacity: .75;
-    }
-    .mission-list { position: relative; display: grid; gap: 12px; }
-    .mission-row {
-      display: grid; grid-template-columns: 46px 1fr; gap: 12px; align-items: center;
-      padding: 13px;
-      border: 2px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.22);
-      border-radius: 16px;
-    }
-    .num {
-      width: 42px; height: 42px; display: grid; place-items: center;
-      background: var(--sand); color: #3a260f; font-weight: 1000;
-      border: 3px solid rgba(0,0,0,.28);
-      box-shadow: inset 0 -6px 0 rgba(0,0,0,.12);
-    }
-    .section { padding: 54px 0; }
-    .section-title { margin-bottom: 22px; }
-    .section-title h2 { font-size: clamp(30px, 4vw, 52px); margin: 0 0 8px; line-height: 1.08; }
-    .section-title p { margin: 0; color: var(--muted); font-size: 18px; }
-    .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; }
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03)), var(--panel);
-      border: 4px solid rgba(0,0,0,.35);
-      border-radius: 22px;
-      overflow: hidden;
-      box-shadow: 0 12px 0 rgba(0,0,0,.22), var(--shadow);
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-    }
-    .photo {
-      aspect-ratio: 4 / 3;
-      width: 100%;
-      object-fit: cover;
-      background: #20351f;
-      image-rendering: auto;
-      border-bottom: 4px solid rgba(0,0,0,.35);
-    }
-    .card-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
-    .role { color: var(--gold); font-weight: 1000; font-size: 14px; letter-spacing: .04em; }
-    .card h3 { margin: 0; font-size: 25px; line-height: 1.15; }
-    .tags { display: flex; gap: 7px; flex-wrap: wrap; }
-    .tag { font-size: 12px; font-weight: 900; padding: 4px 8px; border-radius: 999px; background: rgba(123,211,72,.18); border: 1px solid rgba(123,211,72,.35); color: #dfffcb; }
-    .quote { padding: 12px; background: rgba(0,0,0,.22); border-left: 5px solid var(--gold); border-radius: 10px; font-weight: 900; color: #fff4b8; }
-    .facts { margin: 0; padding-left: 18px; color: #e9ffdd; }
-    .facts li { margin: 6px 0; }
-    .minecraft-task { margin-top: auto; padding: 12px; border-radius: 12px; background: rgba(124,199,255,.12); border: 1px solid rgba(124,199,255,.28); color: #ddf4ff; }
-    .source-link { font-size: 13px; color: #bdf4ff; font-weight: 800; text-decoration: none; }
-    .timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
-    .step {
-      padding: 18px;
-      background: rgba(0,0,0,.22);
-      border: 2px solid rgba(255,255,255,.16);
-      border-radius: 18px;
-    }
-    .step b { color: var(--gold); display: block; margin-bottom: 6px; }
-    .license-box {
-      background: linear-gradient(180deg, rgba(255,214,90,.16), rgba(255,255,255,.03)), #253419;
-      border: 4px solid rgba(0,0,0,.35);
-      border-radius: 22px;
-      padding: 22px;
-      color: #fff9da;
-    }
-    .license-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
-    .credit {
-      padding: 14px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 14px;
-    }
-    .credit a { color: #bdf4ff; font-weight: 800; }
-    footer { padding: 34px 0 48px; color: var(--muted); text-align: center; }
-    @media (max-width: 1040px) {
-      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .timeline { grid-template-columns: repeat(2, 1fr); }
-      .hero-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-      .cards, .timeline, .license-grid { grid-template-columns: 1fr; }
-      .nav-inner { align-items: flex-start; flex-direction: column; padding: 14px 0; }
-      .hero { padding-top: 42px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麥塊AI世界冒險王(1) - 名人冒險傳記</title>
+    <meta name="description" content="麥塊AI世界冒險王名人教學網頁：萊特兄弟、凱瑟琳・強森、阿爾弗雷德・諾貝爾、愛因斯坦、霍華德・卡特，結合 Minecraft Education 任務學習。">
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --menu-bg: #151515;
+            --text-color: #d0d0d0;
+            --accent-color: #4caf50;
+            --highlight-gold: #ffd700;
+            --info-box-bg: rgba(255, 255, 255, 0.03);
+            --nav-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'PingFang TC', 'Microsoft JhengHei', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 15;
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .mobile-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        nav {
+            width: var(--nav-width);
+            background-color: var(--menu-bg);
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.7);
+            z-index: 20;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-family: 'Courier New', monospace;
+            font-size: 1.35rem;
+            color: var(--accent-color);
+            margin-bottom: 35px;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(76,175,80,0.5);
+            border: 2px solid var(--accent-color);
+            padding: 15px;
+            line-height: 1.25;
+        }
+
+        .menu-item {
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #222;
+            color: #777;
+            font-size: 1.05rem;
+        }
+
+        .menu-item:hover {
+            color: #fff;
+            padding-left: 25px;
+            background: linear-gradient(90deg, rgba(76,175,80,0.1), transparent);
+        }
+
+        .menu-item.active {
+            color: var(--highlight-gold);
+            border-left: 4px solid var(--highlight-gold);
+            background: rgba(255, 215, 0, 0.05);
+            font-weight: bold;
+        }
+
+        main {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            scroll-behavior: smooth;
+            padding-bottom: 100px;
+        }
+
+        .content-section {
+            display: none;
+            padding: 60px 10%;
+            max-width: 930px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 1s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .portrait-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .portrait {
+            width: 250px;
+            height: 320px;
+            object-fit: cover;
+            border: 10px solid #f0f0f0;
+            border-bottom: 40px solid #f0f0f0; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            filter: sepia(0.2) contrast(1.1);
+            transform: rotate(-2deg);
+            transition: all 0.4s ease;
+            max-width: 100%;
+            background: #222;
+        }
+
+        .portrait:hover {
+            transform: rotate(0deg) scale(1.05);
+            filter: sepia(0);
+            z-index: 5;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: var(--highlight-gold);
+            margin-bottom: 5px;
+            text-align: center;
+            word-break: keep-all;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 40px;
+            display: block;
+        }
+
+        .section-title {
+            color: var(--highlight-gold);
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-card {
+            background: var(--info-box-bg);
+            border-left: 3px solid var(--accent-color);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .info-card h3 {
+            color: var(--highlight-gold);
+            margin-top: 0;
+            font-size: 1.4rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .quote {
+            margin: 10px 0 35px 0;
+            padding: 20px;
+            border-left: 5px solid var(--highlight-gold);
+            background: rgba(255, 215, 0, 0.05);
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #eee;
+        }
+
+        .mission-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: -20px 0 35px;
+        }
+
+        .tag {
+            border: 1px solid rgba(76,175,80,0.55);
+            color: #b9f6ca;
+            background: rgba(76,175,80,0.08);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.92rem;
+            font-weight: bold;
+        }
+
+        .source-link {
+            color: #9ee7ff;
+            font-weight: bold;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(158,231,255,.7);
+        }
+
+        .source-link:hover {
+            color: #fff;
+        }
+
+        strong {
+            color: #fff3a0;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABZJREFUeNpi2r9//38gYGAEESAAEGAAasgJOgzOKCoAAAAASUVORK5CYII=');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .association-footer {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: calc(100% - var(--nav-width));
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 40%, transparent);
+            color: var(--highlight-gold);
+            text-align: center;
+            padding: 15px 0 20px 0;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            z-index: 10;
+            text-shadow: 0 2px 5px rgba(0,0,0,1);
+            pointer-events: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 260px;
+                transform: translateX(-100%);
+            }
+
+            nav.active {
+                transform: translateX(0);
+            }
+
+            main {
+                width: 100%;
+                padding-top: 60px;
+                padding-bottom: 90px; 
+            }
+
+            .content-section {
+                padding: 40px 5%;
+            }
+
+            h1 { font-size: 2rem; }
+            .quote { font-size: 1rem; }
+
+            .association-footer {
+                width: 100%;
+                font-size: 1.1rem;
+                background: rgba(10, 10, 10, 0.95);
+                padding: 15px 0;
+                border-top: 1px solid #333;
+            }
+        }
+    </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="wrap nav-inner">
-      <div class="brand"><span class="cube" aria-hidden="true"></span><span>麥塊 AI 世界冒險王</span></div>
-      <div class="nav-links">
-        <a href="#heroes">名人任務</a>
-        <a href="#flow">課程流程</a>
-        <a href="#license">照片來源</a>
-      </div>
-    </div>
-  </nav>
 
-  <header class="hero">
-    <div class="wrap hero-grid">
-      <div>
-        <div class="badge">Minecraft Education × AI × 世界名人</div>
-        <h1>用方塊打開<br><strong>名人的冒險世界</strong></h1>
-        <p class="lead">從天空跑道、太空座標、紅石能量、時空指令到古文明密室，讓學生用 Minecraft 任務認識真實名人的故事，也學會座標、變數、條件、紅石與指令方塊。</p>
-        <div class="actions">
-          <a class="btn" href="#heroes">開始探索名人卡</a>
-          <a class="btn secondary" href="#flow">查看任務主線</a>
-        </div>
-      </div>
-      <aside class="mini-map" aria-label="冒險地圖">
-        <div class="mission-list">
-          <div class="mission-row"><span class="num">01</span><span><b>萊特兄弟</b><br>建造空中跑道，學習座標與方向。</span></div>
-          <div class="mission-row"><span class="num">02</span><span><b>凱瑟琳・強森</b><br>用變數與條件修正太空軌道。</span></div>
-          <div class="mission-row"><span class="num">03</span><span><b>諾貝爾</b><br>設計紅石連閃與 TNT 安全系統。</span></div>
-          <div class="mission-row"><span class="num">04</span><span><b>愛因斯坦</b><br>用 command block 製作時空實驗。</span></div>
-          <div class="mission-row"><span class="num">05</span><span><b>霍華德・卡特</b><br>破解金字塔密室與古文明機關。</span></div>
-        </div>
-      </aside>
-    </div>
-  </header>
+    <div class="bg-pattern"></div>
+    <button class="menu-toggle" onclick="toggleMenu()">☰ 選單</button>
+    <div class="mobile-overlay" onclick="toggleMenu()"></div>
 
-  <main>
-    <section id="heroes" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>五位名人，五個麥塊任務</h2>
-          <p>每張卡片都可以放進教學網頁，也可以改成課程簡報、學習單或闖關任務說明。</p>
-        </div>
+    <nav id="sidebar">
+        <div class="logo">麥塊AI<br>世界冒險王</div>
+        <div class="menu-item active" onclick="showPage('wright', this)">萊特兄弟</div>
+        <div class="menu-item" onclick="showPage('johnson', this)">凱瑟琳・強森</div>
+        <div class="menu-item" onclick="showPage('nobel', this)">阿爾弗雷德・諾貝爾</div>
+        <div class="menu-item" onclick="showPage('einstein', this)">愛因斯坦</div>
+        <div class="menu-item" onclick="showPage('carter', this)">霍華德・卡特</div>
+        <div class="menu-item" onclick="showPage('summary', this)">課程總結</div>
+    </nav>
 
-        <div class="cards">
-          <article class="card">
-            <img class="photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/Wright_brothers.jpg" alt="萊特兄弟真實照片" />
-            <div class="card-body">
-              <div class="role">天空跑道的飛行工程師</div>
-              <h3>萊特兄弟</h3>
-              <div class="tags"><span class="tag">飛行</span><span class="tag">座標</span><span class="tag">方向控制</span></div>
-              <p>萊特兄弟就像麥塊世界第一批挑戰「飛行模組」的工程玩家。他們不斷測試滑翔、風向、平衡與控制，最後讓人類成功飛上天空。</p>
-              <ul class="facts"><li>真實成就：早期成功動力飛機與飛行控制技術。</li><li>學習重點：X、Y、Z 座標、方向、跑道結構。</li></ul>
-              <div class="quote">沒有準確座標，就沒有安全起飛！</div>
-              <div class="minecraft-task"><b>麥塊任務：</b>建造空中跑道、塔臺、停機坪，讓 AI 機器人協助鋪設跑道。</div>
-              <a class="source-link" href="https://en.wikipedia.org/wiki/Wright_brothers" target="_blank" rel="noopener">Wikipedia 資料頁</a>
+    <main>
+        <div id="wright" class="content-section active">
+            <div class="portrait-container">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Wright%20brothers.jpg" alt="Wright brothers" class="portrait">
             </div>
-          </article>
+            <h1>萊特兄弟</h1>
+            <span class="subtitle">"天空跑道的飛行工程師，第一關的座標挑戰者"</span>
+            <div class="mission-tags"><span class="tag">飛行工程</span><span class="tag">座標系統</span><span class="tag">方向控制</span><span class="tag">空中跑道</span></div>
 
-          <article class="card">
-            <img class="photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/Katherine%20Johnson%201983.jpg" alt="凱瑟琳・強森真實照片" />
-            <div class="card-body">
-              <div class="role">NASA 的太空座標計算師</div>
-              <h3>凱瑟琳・強森</h3>
-              <div class="tags"><span class="tag">數學</span><span class="tag">變數</span><span class="tag">太空軌道</span></div>
-              <p>她像太空任務中的「超級指令方塊大腦」，用精準計算幫助太空船找到正確路線，讓太空人能安全飛行並回到地球。</p>
-              <ul class="facts"><li>真實成就：NASA 早期載人太空任務軌道計算。</li><li>學習重點：變數、條件判斷、路徑修正。</li></ul>
-              <div class="quote">每一個數字，都是太空船回家的路。</div>
-              <div class="minecraft-task"><b>麥塊任務：</b>記錄座標變數，用條件判斷修正 AI 機器人的太空導航。</div>
-              <a class="source-link" href="https://en.wikipedia.org/wiki/Katherine_Johnson" target="_blank" rel="noopener">Wikipedia 資料頁</a>
+            <h3 class="section-title">🌟 冒險口號</h3>
+            <div class="quote">「沒有準確座標，就沒有安全起飛！」</div>
+                  
+            <div class="info-card">
+                <h3>📜 生平歷史</h3>
+                <p>萊特兄弟是美國早期飛行先驅。他們不只想像人類可以飛上天空，還不斷測試滑翔翼、風向、平衡和控制方法。每一次失敗都像在麥塊裡重新讀取世界、修正設計，最後成功讓動力飛機飛上天空。</p>
             </div>
-          </article>
-
-          <article class="card">
-            <img class="photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/AlfredNobel%20adjusted.jpg" alt="阿爾弗雷德・諾貝爾真實照片" />
-            <div class="card-body">
-              <div class="role">紅石能量與安全爆破專家</div>
-              <h3>阿爾弗雷德・諾貝爾</h3>
-              <div class="tags"><span class="tag">發明</span><span class="tag">紅石</span><span class="tag">TNT 安全</span></div>
-              <p>諾貝爾像麥塊世界中的 TNT 安全工程師。他提醒我們：科技不只是威力強，更要能被安全、負責任地控制。</p>
-              <ul class="facts"><li>真實成就：瑞典化學家、工程師、發明家，與炸藥和諾貝爾獎聞名。</li><li>學習重點：紅石訊號、延遲、安全範圍。</li></ul>
-              <div class="quote">真正的高手，不是炸得大聲，而是控制得精準。</div>
-              <div class="minecraft-task"><b>麥塊任務：</b>設計紅石連閃機關、自動採集裝置與 TNT 安全警示區。</div>
-              <a class="source-link" href="https://en.wikipedia.org/wiki/Alfred_Nobel" target="_blank" rel="noopener">Wikipedia 資料頁</a>
+            <div class="info-card">
+                <h3>🛠️ 麥塊任務</h3>
+                <p>在冒險王課程中，萊特兄弟負責開啟<strong>空中跑道任務</strong>。學生要使用座標、方向和方塊排列，建造跑道、塔臺與停機坪，讓飛機可以安全起飛。</p>
             </div>
-          </article>
-
-          <article class="card">
-            <img class="photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/Einstein%201921%20by%20F%20Schmutzer%20-%20restoration.jpg" alt="阿爾伯特・愛因斯坦真實照片" />
-            <div class="card-body">
-              <div class="role">時空實驗室的物理魔法師</div>
-              <h3>愛因斯坦</h3>
-              <div class="tags"><span class="tag">相對論</span><span class="tag">光電效應</span><span class="tag">指令方塊</span></div>
-              <p>愛因斯坦像研究「時間與空間規則」的大師。他思考光、重力、時間與能量，讓人類重新理解宇宙的運作方式。</p>
-              <ul class="facts"><li>真實成就：提出相對論，並因光電效應研究獲諾貝爾物理學獎。</li><li>學習重點：command block、summon、title、紅石計時器。</li></ul>
-              <div class="quote">當方塊開始漂浮，時空實驗就開始了！</div>
-              <div class="minecraft-task"><b>麥塊任務：</b>用指令方塊召喚生物、顯示任務標題，製作漂浮羊與時空迷宮。</div>
-              <a class="source-link" href="https://en.wikipedia.org/wiki/Albert_Einstein" target="_blank" rel="noopener">Wikipedia 資料頁</a>
+            <div class="info-card">
+                <h3>💡 學習重點</h3>
+                <p>對應 Minecraft Education 的 <strong>X / Y / Z 座標</strong>、方向判斷、重複建造與結構規劃。學生會理解：大型建築不是亂放方塊，而是用座標精準安排。</p>
             </div>
-          </article>
-
-          <article class="card">
-            <img class="photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/Howard%20Carter.jpg" alt="霍華德・卡特真實照片" />
-            <div class="card-body">
-              <div class="role">古文明密室探險家</div>
-              <h3>霍華德・卡特</h3>
-              <div class="tags"><span class="tag">考古</span><span class="tag">金字塔</span><span class="tag">密室解謎</span></div>
-              <p>卡特像沙漠遺跡探險王。他不是用蠻力挖寶，而是觀察線索、保護文物，一步一步揭開古文明的秘密。</p>
-              <ul class="facts"><li>真實成就：因發現圖坦卡門陵墓而聞名。</li><li>學習重點：拉桿機關、數字門、陷阱、密室設計。</li></ul>
-              <div class="quote">真正的寶藏，是破解謎題的能力。</div>
-              <div class="minecraft-task"><b>麥塊任務：</b>製作金字塔、神殿入口、地下階梯、石柱拱門、寶藏密室。</div>
-              <a class="source-link" href="https://en.wikipedia.org/wiki/Howard_Carter" target="_blank" rel="noopener">Wikipedia 資料頁</a>
+            <div class="info-card">
+                <h3>🔗 照片與資料來源</h3>
+                <p><a class="source-link" href="https://en.wikipedia.org/wiki/Wright_brothers" target="_blank" rel="noopener">Wikipedia：Wright brothers</a>｜<a class="source-link" href="https://commons.wikimedia.org/wiki/Category:Wright_brothers" target="_blank" rel="noopener">Wikimedia Commons 圖片分類</a></p>
             </div>
-          </article>
         </div>
-      </div>
-    </section>
 
-    <section id="flow" class="section">
-      <div class="wrap">
-        <div class="section-title">
-          <h2>課程主線：從飛行到古文明</h2>
-          <p>可做成 5 週課程、5 關闖關，或一頁式探索任務。</p>
+        <div id="johnson" class="content-section">
+            <div class="portrait-container">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Katherine%20Johnson%201983.jpg" alt="Katherine Johnson" class="portrait">
+            </div>
+            <h1>凱瑟琳・強森</h1>
+            <span class="subtitle">"NASA 的太空座標計算師，讓火箭找到回家的路"</span>
+            <div class="mission-tags"><span class="tag">數學</span><span class="tag">變數</span><span class="tag">條件判斷</span><span class="tag">太空軌道</span></div>
+       
+            <h3 class="section-title">🌟 冒險口號</h3>
+            <div class="quote">「每一個數字，都是太空船回家的路。」</div>
+              
+            <div class="info-card">
+                <h3>📜 生平歷史</h3>
+                <p>凱瑟琳・強森是美國 NASA 重要數學家。她在電腦還不普及的年代，用精準計算協助太空任務規劃軌道，讓太空人能安全飛行，也能順利返回地球。</p>
+            </div>
+            <div class="info-card">
+                <h3>🛠️ 麥塊任務</h3>
+                <p>她在課程中帶領玩家進入<strong>太空座標任務</strong>。學生要用變數記錄位置，用條件判斷修正路線，幫助 AI 機器人或火箭找到正確航道。</p>
+            </div>
+            <div class="info-card">
+                <h3>💡 科學冷知識</h3>
+                <p>早期太空計算需要極高準確度，因為一點點角度或數字錯誤，都可能讓太空船偏離路線。在麥塊裡也一樣：座標差一格，機關可能就完全失效。</p>
+            </div>
+            <div class="info-card">
+                <h3>🔗 照片與資料來源</h3>
+                <p><a class="source-link" href="https://en.wikipedia.org/wiki/Katherine_Johnson" target="_blank" rel="noopener">Wikipedia：Katherine Johnson</a>｜<a class="source-link" href="https://commons.wikimedia.org/wiki/Category:Katherine_Johnson" target="_blank" rel="noopener">Wikimedia Commons 圖片分類</a></p>
+            </div>
         </div>
-        <div class="timeline">
-          <div class="step"><b>第 1 關｜天空起飛</b>用座標蓋跑道，理解 X/Y/Z 與方向。</div>
-          <div class="step"><b>第 2 關｜太空導航</b>用變數紀錄位置，用條件判斷修正路線。</div>
-          <div class="step"><b>第 3 關｜紅石能量</b>用紅石、TNT 與安全距離設計控制系統。</div>
-          <div class="step"><b>第 4 關｜時空實驗</b>用 summon、title 與 command block 做特效任務。</div>
-          <div class="step"><b>第 5 關｜金字塔探險</b>設計密室、陷阱、拉桿機關與寶藏挑戰。</div>
-        </div>
-      </div>
-    </section>
 
-    <section id="license" class="section">
-      <div class="wrap">
-        <div class="license-box">
-          <h2>照片與授權提醒</h2>
-          <p>本頁照片使用 Wikimedia Commons 的 <b>Special:FilePath</b> 方式引用，方便教學展示。正式公開招生頁或教材檔案建議逐張打開圖片檔案頁，確認 Public Domain、Creative Commons 或其他授權條件，並保留作者、來源與授權文字。</p>
-          <div class="license-grid">
-            <div class="credit"><b>萊特兄弟</b><br><a href="https://commons.wikimedia.org/wiki/Special:FilePath/Wright_brothers.jpg" target="_blank" rel="noopener">Wikimedia Commons 圖片</a></div>
-            <div class="credit"><b>凱瑟琳・強森</b><br><a href="https://commons.wikimedia.org/wiki/Special:FilePath/Katherine%20Johnson%201983.jpg" target="_blank" rel="noopener">Wikimedia Commons 圖片</a></div>
-            <div class="credit"><b>阿爾弗雷德・諾貝爾</b><br><a href="https://commons.wikimedia.org/wiki/Special:FilePath/AlfredNobel%20adjusted.jpg" target="_blank" rel="noopener">Wikimedia Commons 圖片</a></div>
-            <div class="credit"><b>愛因斯坦</b><br><a href="https://commons.wikimedia.org/wiki/Special:FilePath/Einstein%201921%20by%20F%20Schmutzer%20-%20restoration.jpg" target="_blank" rel="noopener">Wikimedia Commons 圖片</a></div>
-            <div class="credit"><b>霍華德・卡特</b><br><a href="https://commons.wikimedia.org/wiki/Special:FilePath/Howard%20Carter.jpg" target="_blank" rel="noopener">Wikimedia Commons 圖片</a></div>
-            <div class="credit"><b>建議做法</b><br>若圖片未正常顯示，改到該人物 Wikipedia 頁面右側照片，複製 Wikimedia Commons 檔案頁連結替換即可。</div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+        <div id="nobel" class="content-section">
+            <div class="portrait-container">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/AlfredNobel%20adjusted.jpg" alt="Alfred Nobel" class="portrait">
+            </div>
+            <h1>阿爾弗雷德・諾貝爾</h1>
+            <span class="subtitle">"紅石能量與安全爆破專家，TNT 不是亂炸用的"</span>
+            <div class="mission-tags"><span class="tag">發明</span><span class="tag">紅石訊號</span><span class="tag">TNT 安全</span><span class="tag">自動機關</span></div>
+                   
+            <h3 class="section-title">🌟 冒險口號</h3>
+            <div class="quote">「真正的高手，不是炸得大聲，而是控制得精準。」</div>
 
-  <footer>
-    <div class="wrap">麥塊 AI 世界冒險王｜Minecraft Education 教學網頁範本</div>
-  </footer>
+            <div class="info-card">
+                <h3>📜 生平歷史</h3>
+                <p>阿爾弗雷德・諾貝爾是瑞典化學家、工程師與發明家。他研究爆炸能量，也讓後人思考：科技不只是追求力量，更要思考安全、責任與對人類的幫助。</p>
+            </div>
+            <div class="info-card">
+                <h3>🛠️ 麥塊任務</h3>
+                <p>諾貝爾關卡結合<strong>紅石連閃機關、TNT 安全警示、自動採集裝置</strong>。學生要學會控制訊號、延遲、開關、距離和安全區域，而不是把所有 TNT 一次點燃。</p>
+            </div>
+            <div class="info-card">
+                <h3>💡 科學冷知識</h3>
+                <p>爆炸與能量研究本身不是壞事，關鍵在於如何控制與使用。這正好可以對應麥塊紅石：同一個訊號，可以開門、亮燈，也可以啟動危險陷阱。</p>
+            </div>
+            <div class="info-card">
+                <h3>🔗 照片與資料來源</h3>
+                <p><a class="source-link" href="https://en.wikipedia.org/wiki/Alfred_Nobel" target="_blank" rel="noopener">Wikipedia：Alfred Nobel</a>｜<a class="source-link" href="https://commons.wikimedia.org/wiki/Category:Alfred_Nobel" target="_blank" rel="noopener">Wikimedia Commons 圖片分類</a></p>
+            </div>
+        </div>
+
+        <div id="einstein" class="content-section">
+            <div class="portrait-container">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Einstein%201921%20by%20F%20Schmutzer%20-%20restoration.jpg" alt="Albert Einstein" class="portrait">
+            </div>
+            <h1>愛因斯坦</h1>
+            <span class="subtitle">"時空實驗室的物理魔法師，讓方塊世界開始改變規則"</span>
+            <div class="mission-tags"><span class="tag">相對論</span><span class="tag">光電效應</span><span class="tag">指令方塊</span><span class="tag">時空迷宮</span></div>
+ 
+            <h3 class="section-title">🌟 冒險口號</h3>
+            <div class="quote">「當方塊開始漂浮，時空實驗就開始了！」</div>
+
+            <div class="info-card">
+                <h3>📜 生平歷史</h3>
+                <p>愛因斯坦是著名物理學家，提出相對論，也研究光與能量的關係。他讓人類重新思考時間、空間、重力與光的運作方式，就像重新理解麥塊世界背後的規則。</p>
+            </div>
+            <div class="info-card">
+                <h3>🛠️ 麥塊任務</h3>
+                <p>在<strong>時空實驗室</strong>中，學生會使用 command block、summon、title、紅石計時器與迷宮生成概念，製作生物召喚、任務提示、漂浮羊和時間加速效果。</p>
+            </div>
+            <div class="info-card">
+                <h3>💡 科學冷知識</h3>
+                <p>愛因斯坦因光電效應相關研究獲得諾貝爾物理學獎。課程中可以用「光、能量、時間」設計成指令方塊任務，例如顯示標題、召喚生物、改變場景節奏。</p>
+            </div>
+            <div class="info-card">
+                <h3>🔗 照片與資料來源</h3>
+                <p><a class="source-link" href="https://en.wikipedia.org/wiki/Albert_Einstein" target="_blank" rel="noopener">Wikipedia：Albert Einstein</a>｜<a class="source-link" href="https://commons.wikimedia.org/wiki/Category:Albert_Einstein" target="_blank" rel="noopener">Wikimedia Commons 圖片分類</a></p>
+            </div>
+        </div>
+
+        <div id="carter" class="content-section">
+            <div class="portrait-container">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Howard%20Carter.jpg" alt="Howard Carter" class="portrait">
+            </div>
+            <h1>霍華德・卡特</h1>
+            <span class="subtitle">"古文明密室探險家，用線索破解金字塔機關"</span>
+            <div class="mission-tags"><span class="tag">考古</span><span class="tag">古埃及</span><span class="tag">拉桿機關</span><span class="tag">密室解謎</span></div>
+
+            <h3 class="section-title">🌟 冒險口號</h3>
+            <div class="quote">「真正的寶藏，不只是黃金，而是破解謎題的能力。」</div>
+
+            <div class="info-card">
+                <h3>📜 生平歷史</h3>
+                <p>霍華德・卡特是英國考古學家與埃及學家，因發現圖坦卡門陵墓而聞名。他的工作需要耐心、觀察力與保護文物的態度，不是看到寶藏就亂挖一通。</p>
+            </div>
+            <div class="info-card">
+                <h3>🛠️ 麥塊任務</h3>
+                <p>卡特關卡進入<strong>古文明建築工坊</strong>。學生要製作金字塔、神殿入口、地下階梯、石柱拱門、寶藏密室，並加入拉桿機關、數字門、沙牆陷阱與平台跳躍。</p>
+            </div>
+            <div class="info-card">
+                <h3>💡 探險冷知識</h3>
+                <p>考古不是破壞式尋寶，而是用線索還原歷史。這可以轉成麥塊任務：玩家必須觀察牆面花紋、按順序啟動機關，才能安全打開密室。</p>
+            </div>
+            <div class="info-card">
+                <h3>🔗 照片與資料來源</h3>
+                <p><a class="source-link" href="https://en.wikipedia.org/wiki/Howard_Carter" target="_blank" rel="noopener">Wikipedia：Howard Carter</a>｜<a class="source-link" href="https://commons.wikimedia.org/wiki/Category:Howard_Carter" target="_blank" rel="noopener">Wikimedia Commons 圖片分類</a></p>
+            </div>
+        </div>
+
+        <div id="summary" class="content-section">
+            <div class="portrait-container">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Minecraft%20cube.svg" alt="Minecraft style cube" class="portrait">
+            </div>
+            <h1>課程總結</h1>
+            <span class="subtitle">"五位名人變成五個任務，讓學生用方塊學會科技、歷史與創造力"</span>
+            <div class="mission-tags"><span class="tag">座標</span><span class="tag">AI Agent</span><span class="tag">紅石</span><span class="tag">指令方塊</span><span class="tag">古文明</span></div>
+
+            <h3 class="section-title">🌟 冒險口號</h3>
+            <div class="quote">「從天空飛行到古文明密室，冒險王學到的不只是知識，而是解決問題的方法。」</div>
+
+            <div class="info-card">
+                <h3>📜 名人主線</h3>
+                <p>萊特兄弟帶學生學會座標與跑道建造；凱瑟琳・強森帶學生理解變數與太空路線；諾貝爾帶學生操作紅石與安全機關；愛因斯坦帶學生進入指令方塊與時空實驗；霍華德・卡特帶學生完成古文明解謎任務。</p>
+            </div>
+            <div class="info-card">
+                <h3>🛠️ 學過的麥塊技能</h3>
+                <p>學生會接觸 <strong>座標系統、AI Agent、變數、條件判斷、紅石訊號、TNT 安全、summon、title、command block、迷宮與密室設計</strong>，最後能把程式變成自己的冒險地圖。</p>
+            </div>
+            <div class="info-card">
+                <h3>💡 網頁使用提醒</h3>
+                <p>人物照片引用自 Wikipedia / Wikimedia Commons。正式對外公開時，請逐張進入圖片檔案頁確認授權，並保留作者、來源與授權資訊。</p>
+            </div>
+        </div>
+    </main>
+
+    <div class="association-footer">社團法人台灣資訊教育發展協會</div>
+
+    <script>
+        function toggleMenu() {
+            const nav = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            nav.classList.toggle('active');
+            
+            if (nav.classList.contains('active')) {
+                overlay.style.display = 'block';
+                setTimeout(() => overlay.classList.add('active'), 10);
+            } else {
+                overlay.classList.remove('active');
+                setTimeout(() => overlay.style.display = 'none', 300);
+            }
+        }
+
+        function showPage(pageId, element) {
+            const contents = document.querySelectorAll('.content-section');
+            contents.forEach(div => div.classList.remove('active'));
+
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => item.classList.remove('active'));
+
+            const target = document.getElementById(pageId);
+            if (target) {
+                target.classList.add('active');
+                document.querySelector('main').scrollTop = 0;
+            }
+
+            element.classList.add('active');
+
+            if (window.innerWidth <= 768) {
+                toggleMenu();
+            }
+        }
+    </script>
 </body>
 </html>
